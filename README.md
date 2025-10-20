@@ -65,7 +65,7 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
   Satış özetleri, en çok satan ürünler.
 
 ---
-
+'''
 ## 🧱 Mimari & Dizin Yapısı
 
 Gerçek proje ağacına göre:
@@ -127,7 +127,7 @@ Kodu kopyala
 İlke: **Controller → Service → Repository → Model (Entities)**  
 Bağımlılıklar tersine çevrilmiştir: Controller’lar Interface’lere karşı programlar.
 
-
+'''
 ## ⚙️ Kurulum
 
 ### Gereksinimler
