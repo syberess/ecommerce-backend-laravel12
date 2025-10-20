@@ -68,8 +68,6 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
 
 ## 🧱 Mimari & Dizin Yapısı
 
-<details>
-<summary><b>Gerçek proje ağacı (tıkla aç)</b></summary>
 
 ```bash
 app/
@@ -126,10 +124,7 @@ routes/
 İlke: Controller → Service → Repository → Model (Entities)
 Bağımlılıklar tersine çevrildi: Controller’lar Interface’lere karşı programlar.
 
-yaml
-Kodu kopyala
 
----
 
 ## ⚙️ Kurulum
 
