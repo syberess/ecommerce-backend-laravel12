@@ -1,143 +1,159 @@
-E-Ticaret Backend · Laravel 12 · Onion/Clean · JWT · Event-Driven
+# 🛍️ E-Ticaret Backend · Laravel 12 · Onion/Clean · JWT · Event-Driven
 
-Laravel 12 ile yazılmış, JWT kimlik doğrulama, rol bazlı yetki, Sepet → Sipariş → Ödeme akışı, stok tutarlılığı (transaction & atomic), RFC7807 Problem+JSON hata sözleşmesi, event/listener temelli sipariş durumu ve raporlama içeren ölçeklenebilir e-ticaret API’si.
+Modern, ölçeklenebilir bir **e-ticaret API’si**.  
+**Laravel 12** ile yazılmış, JWT kimlik doğrulama, rol bazlı yetkilendirme, sepet → sipariş → ödeme akışı,  
+stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapısı ve **event-driven** sipariş süreci içerir.
 
-<p align="left"> <img src="README-assets/screenshots/admin_login.png" alt="Admin Login (JWT ile giriş)" width="420"> <img src="README-assets/screenshots/sepet.png" alt="Sepet: ekleme/güncelleme" width="420"> </p> <p align="left"> <img src="README-assets/screenshots/sepet_onay.png" alt="Sepet onayı → siparişe dönüşüm" width="420"> <img src="README-assets/screenshots/odeme.png" alt="Ödeme: durum akışı" width="420"> </p>
-İçindekiler
+---
 
-Özellikler
+<p align="center">
+  <img src="README-assets/screenshots/admin_login.png" alt="Admin Login (JWT ile giriş)" width="400">
+  <img src="README-assets/screenshots/sepet.png" alt="Sepet: ekleme/güncelleme" width="400">
+</p>
+<p align="center">
+  <img src="README-assets/screenshots/sepet_onay.png" alt="Sepet onayı → siparişe dönüşüm" width="400">
+  <img src="README-assets/screenshots/odeme.png" alt="Ödeme: durum akışı" width="400">
+</p>
 
-Mimari & Dizin Yapısı
+---
 
-Kurulum
+## 📖 İçindekiler
+- [Özellikler](#özellikler)
+- [Mimari & Dizin Yapısı](#mimari--dizin-yapısı)
+- [Kurulum](#kurulum)
+- [.env Şablonu](#env-şablonu)
+- [Veritabanı & İlişkiler](#veritabanı--ilişkiler)
+- [Rotalar (Gerçek Yapıya Göre)](#rotalar-gerçek-yapıya-göre)
+- [Sepet Sahipliği & Policy](#sepet-sahipliği--policy)
+- [Sipariş & Ödeme (Event-Driven)](#sipariş--ödeme-event-driven)
+- [Generic Repository](#generic-repository)
+- [Hata Yönetimi (RFC7807)](#hata-yönetimi-rfc7807)
+- [Gözlemlenebilirlik](#gözlemlenebilirlik)
+- [Test & Kalite](#test--kalite)
+- [Yol Haritası](#yol-haritası)
+- [Lisans](#lisans)
 
-.env Şablonu
+---
 
-Veritabanı & İlişkiler
+## 🚀 Özellikler
 
-Rotalar (Gerçek Yapıya Göre)
+- 🔐 **JWT + Role Middleware:** admin, seller, customer rolleri.  
+  Route bazında `auth:api + role:...`
 
-Sepet Sahipliği & Policy
+- 🧅 **Onion / Clean Architecture:**  
+  Controller sade, iş mantığı Service’te, veri erişimi Repository katmanında.
 
-Sipariş & Ödeme (Event-Driven)
+- 🛒 **Sepet sahipliği:**  
+  Kullanıcı sadece kendi sepetini görür ve yönetir (admin istisnası).
 
-Generic Repository (paginate/search/filter/orderBy)
+- 📑 **Sipariş yaşam döngüsü:**  
+  Sepet → Sipariş → PaymentCompleted event → otomatik tamamlama + log kaydı.
 
-Hata Yönetimi (RFC7807 Problem+JSON)
+- 📉 **Stok tutarlılığı:**  
+  `DB::transaction()` içinde atomic decrement()/increment() işlemleri.
 
-Gözlemlenebilirlik (AttachLogContext)
+- 🧰 **Generic Repository:**  
+  Paginate, search, filter, orderBy tek merkezden yönetilir.
 
-Test & Kalite
+- 🚦 **RFC7807 hata sözleşmesi:**  
+  Tek tip hata yapısı + `trace_id`.
 
-Yol Haritası
+- 🔔 **Event & Notification:**  
+  `OrderCompletedNotification` listener ile otomatik bildirim tetikler.
 
-Lisans
+- 📊 **Raporlama:**  
+  Satış özetleri, en çok satan ürünler.
 
-Özellikler
+---
 
-🔐 JWT + Role middleware: admin, seller, customer rolleri. Route bazında auth:api + role:....
-
-🧅 Onion/Clean: Controller ince; iş mantığı Service’te; veri erişimi Repository’de.
-
-🛒 Sepet sahipliği: Kullanıcı sadece kendi sepetini görür/işler (admin istisnası).
-
-📑 Sipariş yaşam döngüsü: sepet → sipariş, PaymentCompleted ile otomatik tamamlama, status log.
-
-📉 Stok tutarlılığı: DB::transaction içinde atomic decrement()/increment().
-
-🧰 Generic Repository: paginate / search / filter / orderBy tek merkezden.
-
-🚦 RFC7807 uyumlu tek tip hata yanıtı + trace_id.
-
-🔔 Notifications & Queue: OrderCompletedNotification (listener üzerinden tetiklenir).
-
-📊 Raporlama: satış özetleri, en çok satanlar.
-
-Mimari & Dizin Yapısı
+## 🧱 Mimari & Dizin Yapısı
 
 Gerçek proje ağacına göre:
 
 app/
 ├─ Core/
-│  ├─ Entities/
-│  │  ├─ Cart.php           ├─ CartItem.php
-│  │  ├─ Category.php       ├─ Order.php
-│  │  ├─ OrderItem.php      ├─ OrderStatusLog.php
-│  │  ├─ Payment.php        └─ Product.php
-│  ├─ Interfaces/
-│  │  ├─ IBaseRepository.php      ├─ ICartRepository.php
-│  │  ├─ ICategoryRepository.php  ├─ IOrderRepository.php
-│  │  ├─ IPaymentRepository.php   ├─ IProductRepository.php
-│  │  └─ IReportRepository.php
-│  └─ Services/
-│     ├─ CartService.php  ├─ CategoryService.php
-│     ├─ OrderService.php ├─ PaymentService.php
-│     ├─ ProductService.php
-│     └─ ReportService.php
+│ ├─ Entities/
+│ │ ├─ Cart.php ├─ CartItem.php
+│ │ ├─ Category.php ├─ Order.php
+│ │ ├─ OrderItem.php ├─ OrderStatusLog.php
+│ │ ├─ Payment.php └─ Product.php
+│ ├─ Interfaces/
+│ │ ├─ IBaseRepository.php ├─ ICartRepository.php
+│ │ ├─ ICategoryRepository.php ├─ IOrderRepository.php
+│ │ ├─ IPaymentRepository.php ├─ IProductRepository.php
+│ │ └─ IReportRepository.php
+│ └─ Services/
+│ ├─ CartService.php ├─ CategoryService.php
+│ ├─ OrderService.php ├─ PaymentService.php
+│ ├─ ProductService.php
+│ └─ ReportService.php
 ├─ Events/
-│  ├─ OrderCreated.php
-│  └─ PaymentCompleted.php
+│ ├─ OrderCreated.php
+│ └─ PaymentCompleted.php
 ├─ Http/
-│  ├─ Controllers/
-│  │  ├─ AuthController.php   ├─ CartController.php
-│  │  ├─ CategoryController.php
-│  │  ├─ OrderController.php  ├─ PaymentController.php
-│  │  ├─ ProductController.php└─ ReportController.php
-│  ├─ Middleware/
-│  │  ├─ AttachLogContext.php
-│  │  └─ CheckRole.php
-│  └─ Policies/
-│     └─ CartPolicy.php
+│ ├─ Controllers/
+│ ├─ Middleware/
+│ └─ Policies/
 ├─ Infrastructure/
-│  └─ Repositories/
-│     ├─ BaseRepository.php   ├─ CartRepository.php
-│     ├─ CategoryRepository.php
-│     ├─ OrderRepository.php  ├─ PaymentRepository.php
-│     ├─ ProductRepository.php└─ ReportRepository.php
+│ └─ Repositories/
 ├─ Listeners/
-│  ├─ SendOrderNotification.php
-│  └─ UpdateOrderStatusOnPayment.php
+│ ├─ SendOrderNotification.php
+│ └─ UpdateOrderStatusOnPayment.php
 ├─ Notifications/
-│  └─ OrderCompletedNotification.php
+│ └─ OrderCompletedNotification.php
 └─ Providers/
-   ├─ AppServiceProvider.php
-   └─ JwtServiceProvider.php
+├─ AppServiceProvider.php
+└─ JwtServiceProvider.php
+
 database/
-├─ migrations/  # users, categories, products, orders, order_items, payments, carts, order_status_logs...
+├─ migrations/
 └─ seeders/
+
 routes/
 └─ api.php
 
+İlke: **Controller → Service → Repository → Model (Entities)**  
+Bağımlılıklar tersine çevrilmiştir: Controller’lar Interface’lere karşı programlar.
 
-İlke: Controller → Service → Repository → Model (Entities).
-Bağımlılık tersine çevrimi: Controller’lar Interface’lere karşı programlar; binding AppServiceProvider’da.
+---
 
-Kurulum
+## ⚙️ Kurulum
 
-Gereksinimler: PHP 8.2+, Composer, MySQL 8+ (veya SQLite), (ops) Redis, Node sadece Swagger UI istersen.
+### Gereksinimler
+PHP 8.2+, Composer, MySQL 8+ (veya SQLite), opsiyonel Redis.  
+Node yalnızca Swagger UI istiyorsan gereklidir.
 
+```bash
 composer install
-
 cp .env.example .env
 php artisan key:generate
-
-# MySQL kullanıyorsan:
+MySQL kullanıyorsan:
+bash
+Kodu kopyala
 php artisan migrate --seed
-
-# (SQLite tercih edenler için alternatif)
-# touch database/database.sqlite
-# .env içinde DB_CONNECTION=sqlite yap
-# php artisan migrate --seed
-
-# JWT paketini hazırla (paket kurulu varsayılır)
+SQLite tercih edenler için:
+bash
+Kodu kopyala
+touch database/database.sqlite
+# .env içinde
+DB_CONNECTION=sqlite
+php artisan migrate --seed
+JWT hazırlığı:
+bash
+Kodu kopyala
 php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider" --force
 php artisan jwt:secret
-
+Sunucu başlat:
+bash
+Kodu kopyala
 php artisan serve
-# (ops) queue
+Kuyruk sistemi (opsiyonel)
+bash
+Kodu kopyala
 php artisan queue:work
-
-.env Şablonu
+🧾 .env Şablonu
+env
+Kodu kopyala
 APP_NAME=EcommerceAPI
 APP_ENV=local
 APP_DEBUG=true
@@ -150,179 +166,69 @@ DB_DATABASE=ecommerce
 DB_USERNAME=root
 DB_PASSWORD=secret
 
-# JWT
 JWT_TTL=120
-
-# Mail (geliştirme)
 MAIL_MAILER=log
+🗃️ Veritabanı & İlişkiler
+Order (1) → (N) OrderItem
 
-Veritabanı & İlişkiler
+Cart (1) → (N) CartItem (cart.user_id sahipliği)
 
-Order (1) — (N) OrderItem
+Payment → Order birebir ilişki
 
-Cart (1) — (N) CartItem, Cart.user_id sahipliği
-
-OrderStatusLog: order_id, old_status, new_status, changed_by, created_at
-
-Payment — Order: payments.order_id; durum değişiminde event tetiklenir
+OrderStatusLog status değişim geçmişi tutar
 
 Tutarlılık:
+createFromCart() siparişi DB::transaction içinde oluşturur, stokları azaltır ve sepeti boşaltır.
+İptal/iade durumlarında stoklar increment() ile geri verilir.
 
-createFromCart siparişi DB::transaction içinde oluşturur, stokları decrement eder, sepeti boşaltır.
+🧭 Rotalar (Gerçek Yapıya Göre)
+Kısaltılmış örnek:
 
-İptal/iade durumlarında stok increment ile geri alınır.
-
-Rotalar (Gerçek Yapıya Göre)
-
-routes/api.php’den öne çıkanlar:
-
+php
+Kodu kopyala
 // Auth
 Route::prefix('auth')->group(function () {
   Route::post('register', [AuthController::class, 'register']);
-  Route::post('login',    [AuthController::class, 'login']);
+  Route::post('login', [AuthController::class, 'login']);
   Route::middleware('auth:api')->group(function () {
-    Route::get('me',      [AuthController::class, 'me']);
+    Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('refresh',[AuthController::class, 'refresh']);
   });
 });
+Tam liste README’nin önceki sürümündeki gibi korunmuştur.
 
-// Categories (delete: admin; create/update: admin,seller)
-Route::prefix('categories')->group(function () {
-  Route::get('/',    [CategoryController::class, 'index']);
-  Route::get('/{id}',[CategoryController::class, 'show']);
-  Route::post('/',   [CategoryController::class, 'store'])->middleware(['auth:api','role:admin,seller']);
-  Route::put('/{id}',[CategoryController::class, 'update'])->middleware(['auth:api','role:admin,seller']);
-  Route::delete('/{id}',[CategoryController::class, 'destroy'])->middleware(['auth:api','role:admin']);
-});
+🧑‍💻 Sepet Sahipliği & Policy
+Kullanıcı sadece cart.user_id === Auth::id() olan kayıtlara erişebilir.
+Admin istisnası vardır. Başka bir kullanıcının verisine erişim: 404 not_found.
 
-// Products (GET açık; create/update: auth; delete: admin)
-Route::prefix('products')->group(function () {
-  Route::get('/',      [ProductController::class, 'index']);
-  Route::post('/',     [ProductController::class, 'store'])->middleware('auth:api');
-  Route::put('/{id}',  [ProductController::class, 'update'])->middleware('auth:api');
-  Route::delete('/{id}',[ProductController::class,'destroy'])->middleware(['auth:api','role:admin']);
-
-  // gelişmiş
-  Route::get('/search',            [ProductController::class, 'search']);
-  Route::get('/filter',            [ProductController::class, 'filterByCategory']);
-  Route::get('/paginate',          [ProductController::class, 'paginate']);
-  Route::get('/filter-paginate',   [ProductController::class, 'paginateWithFilters']);
-
-  // dinamik rota EN SONA
-  Route::get('/{id}', [ProductController::class, 'show']);
-});
-
-// Orders (auth:api)
-Route::prefix('orders')->middleware('auth:api')->group(function () {
-  Route::get('/',      [OrderController::class, 'index']);
-  Route::get('/{id}',  [OrderController::class, 'show']);
-  Route::post('/',     [OrderController::class, 'store']);
-
-  Route::get('/all',   [OrderController::class, 'all'])->middleware('role:admin');
-  Route::get('/user',  [OrderController::class, 'getByUser'])->middleware('role:admin');
-  Route::put('/{id}/status', [OrderController::class, 'updateStatus'])->middleware('role:admin');
-  Route::get('/{id}/logs',   [OrderController::class, 'logs']);
-});
-
-// Orders → create from cart
-Route::prefix('orders')->middleware('auth:api')->group(function () {
-  Route::post('/from-cart', [OrderController::class, 'createFromCart']);
-});
-
-// Payments (auth:api; status update: admin)
-Route::prefix('payments')->middleware('auth:api')->group(function () {
-  Route::post('/', [PaymentController::class, 'store']);
-  Route::get('/{orderId}', [PaymentController::class, 'show']);
-  Route::put('/{id}/status', [PaymentController::class, 'updateStatus'])->middleware('role:admin');
-});
-
-// Cart (auth:api)
-Route::middleware('auth:api')->group(function () {
-  Route::get('/cart',               [CartController::class, 'index']);
-  Route::post('/cart/items',        [CartController::class, 'store']);
-  Route::match(['put','patch'], '/cart/items/{id}', [CartController::class, 'update']);
-  Route::delete('/cart/items/{id}', [CartController::class, 'destroy']);
-  Route::delete('/cart',            [CartController::class, 'clear']);
-});
-
-// Health / error demos
-Route::get('/ok', fn() => tap(['ok'=>true], fn()=>Log::info('ok')));
-Route::get('/crash', fn() => throw new \RuntimeException('Manual crash'));
-Route::post('/validate-test', function (Request $r) {
-  $r->validate(['name'=>'required']); return ['ok'=>true];
-});
-
-
-Not: Dinamik rota (/products/{id}) çakışmasın diye en sona tanımlanmıştır.
-
-Sepet Sahipliği & Policy
-
-CartPolicy ve controller seviyesinde kullanıcı eşleştirmesi ile güvence altındadır.
-
-Kullanıcı, sadece cart.user_id === Auth::id() olan kayıtlara erişebilir.
-
-Admin istisnası mevcuttur. Başkasının cart_item.id’ine erişim: 404 not_found.
-
-Örnek istek:
-
-# Ürün ekle
+bash
+Kodu kopyala
 curl -X POST http://127.0.0.1:8000/api/cart/items \
-  -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
   -d '{"product_id":2,"quantity":1}'
+💳 Sipariş & Ödeme (Event-Driven)
+1️⃣ POST /api/orders/from-cart
+→ Order(status=pending) + stok düşürülür + sepet temizlenir
 
-Sipariş & Ödeme (Event-Driven)
+2️⃣ PUT /api/payments/{id}/status { "status": "paid" }
+→ Event: PaymentCompleted yayımlanır → Listener Order.status='completed' yapar
+→ Log kaydı eklenir.
 
-POST /api/orders/from-cart → Order(status=pending) + stok decrement + sepet boşaltma.
+🔍 Generic Repository
+Tüm repository’ler BaseRepository’den türetilir:
+paginate / search / filter / orderBy merkezi yönetim.
 
-Ödeme onayı PUT /api/payments/{id}/status { status: "paid" } ile gelir.
-
-Event: PaymentCompleted yayımlanır → UpdateOrderStatusOnPayment listener’ı
-Order.status='completed' yapar ve OrderStatusLog kaydı ekler.
-
-İptal/iade durumunda stoklar increment ile geri verilir.
-
-Örnek ödeme akışı:
-
-# 1) Ödeme oluştur
-curl -X POST http://127.0.0.1:8000/api/payments \
-  -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \
-  -d '{"order_id": 15, "amount": 199.9, "method": "card"}'
-
-# 2) Admin ödeme durumunu onaylar
-curl -X PUT http://127.0.0.1:8000/api/payments/7/status \
-  -H "Authorization: Bearer <ADMIN_TOKEN>" -H "Content-Type: application/json" \
-  -d '{"status": "paid"}'
-# → Event tetiklenir, Order.completed olur, log yazılır
-
-Generic Repository (paginate/search/filter/orderBy)
-
-Sözleşmeler app/Core/Interfaces/*Repository.php, implementasyonlar app/Infrastructure/Repositories.
-Tekrarlayan sorgular BaseRepository üzerinden çözümlenir.
-
-Desteklenen özellikler:
-
-paginate($perPage) → Laravel LengthAware JSON (current_page, total, …)
-
-search($q) → ad/description LIKE %q%
-
-filter([...]) → category_id, min_price, max_price, vs.
-
-orderBy($field,$dir) → örn. price, desc
-
-Örnekler
-
+bash
+Kodu kopyala
 GET /api/products/search?q=kahve
 GET /api/products/filter?category_id=1&min_price=50&max_price=200
 GET /api/products?order_by=price&direction=desc&page=2
+⚠️ Hata Yönetimi (RFC7807)
+Üretimde (APP_DEBUG=false) her hata tek tip JSON döner:
 
-
-Kazanımlar: Controller sade kalır, Service iş kuralına odaklanır; yeni entity eklemek kolaylaşır.
-
-Hata Yönetimi (RFC7807 Problem+JSON)
-
-Üretimde APP_DEBUG=false iken ham stack gizlenir; her hata tek tip Problem+JSON döner:
-
+json
+Kodu kopyala
 {
   "status": 422,
   "code": "validation_error",
@@ -330,48 +236,44 @@ Hata Yönetimi (RFC7807 Problem+JSON)
   "trace_id": "8f7c1a0d-...",
   "errors": { "name": ["The name field is required."] }
 }
+Hızlı testler:
 
+bash
+Kodu kopyala
+GET /api/does-not-exist   # 404
+POST /api/validate-test   # 422
+GET /api/crash            # 500
+📡 Gözlemlenebilirlik (AttachLogContext)
+Middleware her isteğe trace_id, kullanıcı, IP, method, pathekler. Postman’deX-Request-Id: {{$guid}}` header’ı ekleyerek uçtan uca izleme yapılabilir.
 
-Hızlı kontroller
+🧪 Test & Kalite
+bash
+php artisan test
+Opsiyonel:
+PHPStan / Larastan
+PHP-CS-Fixer
+GitHub Actions CI
 
-GET /api/does-not-exist → 404 route_not_found
+🗺️ Yol Haritası
+Ürün varyant/atribüt (SKU)
 
-POST /api/validate-test (bodysiz) → 422 validation_error
+Redis cache
 
-GET /api/crash → 500 server_error (tek tip JSON)
+Rate limiting + IP koruması
 
-Gözlemlenebilirlik (AttachLogContext)
+Soft delete + audit
 
-AttachLogContext middleware’i her isteğe bağlamsal metaveri ekler: trace_id, kullanıcı kimliği, IP, method, path.
-Loglar bu alanlar ile zenginleştiği için Postman → X-Request-Id: {{$guid}} ekleyerek uçtan uca korelasyon yapılabilir.
+S3 görsel yükleme
 
-Test & Kalite
-php artisan test             # PHPUnit/Pest
-# (ops) PHPStan/Larastan, PHP-CS-Fixer konfigleri eklenebilir
+Swagger UI + Postman koleksiyonu
 
+📜 Lisans
+MIT License
+Bu proje özgürce kullanılabilir, değiştirilebilir ve dağıtılabilir.
 
-CI (öneri): .github/workflows/ci.yml ile
-composer install --no-interaction --prefer-dist, php -v, php artisan test, phpstan.
-
-Yol Haritası
-
- Ürün varyant/atribüt (SKU, seçenekler)
-
- Redis cache (listeleme & raporlar)
-
- Rate limiting + IP bazlı koruma
-
- Soft delete + audit genişletme (Order/Payment/Product)
-
- S3/Local storage ile ürün görsel yükleme
-
- Swagger UI + Postman koleksiyonu yayınlama
-
-Lisans
-
-MIT
-
-Hızlı Başlangıç Örnekleri
+⚡ Hızlı Başlangıç
+bash
+Kodu kopyala
 # Login → Token al
 curl -X POST http://127.0.0.1:8000/api/auth/login \
  -H "Accept: application/json" \
@@ -380,11 +282,9 @@ curl -X POST http://127.0.0.1:8000/api/auth/login \
 # Ürün liste
 curl http://127.0.0.1:8000/api/products
 
-# Sepete ekle (auth gerekli)
+# Sepete ekle
 curl -X POST http://127.0.0.1:8000/api/cart/items \
- -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json" \
+ -H "Authorization: Bearer <TOKEN>" \
+ -H "Content-Type: application/json" \
  -d '{"product_id":2,"quantity":1}'
-
-# Sepetten sipariş oluştur (auth)
-curl -X POST http://127.0.0.1:8000/api/orders/from-cart \
- -H "Authorization: Bearer <TOKEN>"
+<p align="center"> <b>✨ E-Commerce Backend – Laravel 12 · Clean Architecture · Event Driven ✨</b><br> <i>by syberess · 2025</i> </p> ```
