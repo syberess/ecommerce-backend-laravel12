@@ -1,37 +1,37 @@
 # 🛍️ E-Ticaret Backend · Laravel 12 · Onion/Clean · JWT · Event-Driven
 
 Modern, ölçeklenebilir bir **e-ticaret API’si**.  
-**Laravel 12** ile yazılmış, JWT kimlik doğrulama, rol bazlı yetkilendirme, sepet → sipariş → ödeme akışı,  
+**Laravel 12** ile yazılmış; JWT kimlik doğrulama, rol bazlı yetkilendirme, sepet → sipariş → ödeme akışı,  
 stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapısı ve **event-driven** sipariş süreci içerir.
 
 ---
 
 <p align="center">
-  <img src="README-assets/screenshots/Admin_Login.png" alt="Admin Login (JWT ile giriş)" width="400">
-  <img src="README-assets/screenshots/Sepet.png" alt="Sepet: ekleme/güncelleme" width="400">
+  <img src="./README-assets/screenshots/Admin_Login.png" alt="Admin Login (JWT ile giriş)" width="400" />
+  <img src="./README-assets/screenshots/Sepet.png" alt="Sepet: ekleme/güncelleme" width="400" />
 </p>
 <p align="center">
-  <img src="README-assets/screenshots/Sepet_onay.png" alt="Sepet onayı → siparişe dönüşüm" width="400">
-  <img src="README-assets/screenshots/Odeme.png" alt="Ödeme: durum akışı" width="400">
+  <img src="./README-assets/screenshots/Sepet_onay.png" alt="Sepet onayı → siparişe dönüşüm" width="400" />
+  <img src="./README-assets/screenshots/Odeme.png" alt="Ödeme: durum akışı" width="400" />
 </p>
 
 ---
 
 ## 📖 İçindekiler
-- [Özellikler](#özellikler)
-- [Mimari & Dizin Yapısı](#mimari--dizin-yapısı)
-- [Kurulum](#kurulum)
-- [.env Şablonu](#env-şablonu)
-- [Veritabanı & İlişkiler](#veritabanı--ilişkiler)
-- [Rotalar (Gerçek Yapıya Göre)](#rotalar-gerçek-yapıya-göre)
-- [Sepet Sahipliği & Policy](#sepet-sahipliği--policy)
-- [Sipariş & Ödeme (Event-Driven)](#sipariş--ödeme-event-driven)
-- [Generic Repository](#generic-repository)
-- [Hata Yönetimi (RFC7807)](#hata-yönetimi-rfc7807)
-- [Gözlemlenebilirlik](#gözlemlenebilirlik)
-- [Test & Kalite](#test--kalite)
-- [Yol Haritası](#yol-haritası)
-- [Lisans](#lisans)
+- [Özellikler](#-özellikler)
+- [Mimari & Dizin Yapısı](#-mimari--dizin-yapısı)
+- [Kurulum](#-kurulum)
+- [.env Şablonu](#-env-şablonu)
+- [Veritabanı & İlişkiler](#-veritabanı--ilişkiler)
+- [Rotalar (Gerçek Yapıya Göre)](#-rotalar-gerçek-yapıya-göre)
+- [Sepet Sahipliği & Policy](#-sepet-sahipliği--policy)
+- [Sipariş & Ödeme (Event-Driven)](#-sipariş--ödeme-event-driven)
+- [Generic Repository](#-generic-repository)
+- [Hata Yönetimi (RFC7807)](#-hata-yönetimi-rfc7807)
+- [Gözlemlenebilirlik](#-gözlemlenebilirlik)
+- [Test & Kalite](#-test--kalite)
+- [Yol Haritası](#-yol-haritası)
+- [Lisans](#-lisans)
 
 ---
 
@@ -50,7 +50,7 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
   Sepet → Sipariş → PaymentCompleted event → otomatik tamamlama + log kaydı.
 
 - 📉 **Stok tutarlılığı:**  
-  `DB::transaction()` içinde atomic decrement()/increment() işlemleri.
+  `DB::transaction()` içinde atomic `decrement()/increment()` işlemleri.
 
 - 🧰 **Generic Repository:**  
   Paginate, search, filter, orderBy tek merkezden yönetilir.
@@ -65,6 +65,7 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
   Satış özetleri, en çok satan ürünler.
 
 ---
+
 ## 🧱 Mimari & Dizin Yapısı
 
 <details>
@@ -121,13 +122,15 @@ database/
 routes/
 └── api.php
 
-bash
+yaml
 Kodu kopyala
 
 </details>
 
 **İlke:** Controller → Service → Repository → Model (Entities)  
 Bağımlılıklar tersine çevrildi: Controller’lar Interface’lere karşı programlar.
+
+---
 
 ## ⚙️ Kurulum
 
@@ -185,9 +188,9 @@ Order (1) → (N) OrderItem
 
 Cart (1) → (N) CartItem (cart.user_id sahipliği)
 
-Payment → Order birebir ilişki
+Payment → Order (birebir ilişki)
 
-OrderStatusLog status değişim geçmişi tutar
+OrderStatusLog (status değişim geçmişi)
 
 Tutarlılık:
 createFromCart() siparişi DB::transaction içinde oluşturur, stokları azaltır ve sepeti boşaltır.
@@ -224,7 +227,7 @@ curl -X POST http://127.0.0.1:8000/api/cart/items \
 → Order(status=pending) + stok düşürülür + sepet temizlenir
 
 2️⃣ PUT /api/payments/{id}/status { "status": "paid" }
-→ Event: PaymentCompleted yayımlanır → Listener Order.status='completed' yapar
+→ Event: PaymentCompleted yayımlanır → Listener: Order.status='completed' yapar
 → Log kaydı eklenir.
 
 🔍 Generic Repository
@@ -260,10 +263,14 @@ Middleware her isteğe trace_id, kullanıcı, IP, method, pathekler. Postman’d
 
 🧪 Test & Kalite
 bash
+Kodu kopyala
 php artisan test
 Opsiyonel:
+
 PHPStan / Larastan
+
 PHP-CS-Fixer
+
 GitHub Actions CI
 
 🗺️ Yol Haritası
