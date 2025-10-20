@@ -7,7 +7,7 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
 ---
 
 <p align="center">
-  <img src="README-assets/screenshots/admin_login.png" alt="Admin Login (JWT ile giriş)" width="400">
+  <img src="README-assets/screenshots/Admin_Login.png" alt="Admin Login (JWT ile giriş)" width="400">
   <img src="README-assets/screenshots/sepet.png" alt="Sepet: ekleme/güncelleme" width="400">
 </p>
 <p align="center">
