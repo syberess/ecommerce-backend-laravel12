@@ -11,7 +11,7 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
   <img src="README-assets/screenshots/Sepet.png" alt="Sepet: ekleme/güncelleme" width="400">
 </p>
 <p align="center">
-  <img src="README-assets/screenshots/sepet_onay.png" alt="Sepet onayı → siparişe dönüşüm" width="400">
+  <img src="README-assets/screenshots/Sepet_onay.png" alt="Sepet onayı → siparişe dönüşüm" width="400">
   <img src="README-assets/screenshots/Odeme.png" alt="Ödeme: durum akışı" width="400">
 </p>
 
