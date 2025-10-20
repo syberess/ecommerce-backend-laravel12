@@ -65,10 +65,10 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
   Satış özetleri, en çok satan ürünler.
 
 ---
-'''
 ## 🧱 Mimari & Dizin Yapısı
 
-Gerçek proje ağacına göre:
+<details>
+<summary><b>Gerçek proje ağacı (tıkla aç)</b></summary>
 
 app/
 ├── Core/
@@ -121,13 +121,14 @@ database/
 routes/
 └── api.php
 
-graphql
+bash
 Kodu kopyala
 
-İlke: **Controller → Service → Repository → Model (Entities)**  
-Bağımlılıklar tersine çevrilmiştir: Controller’lar Interface’lere karşı programlar.
+</details>
 
-'''
+**İlke:** Controller → Service → Repository → Model (Entities)  
+Bağımlılıklar tersine çevrildi: Controller’lar Interface’lere karşı programlar.
+
 ## ⚙️ Kurulum
 
 ### Gereksinimler
