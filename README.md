@@ -71,51 +71,62 @@ stok tutarlılığı (transaction & atomic), **RFC7807 Problem+JSON** hata yapı
 Gerçek proje ağacına göre:
 
 app/
-├─ Core/
-│ ├─ Entities/
-│ │ ├─ Cart.php ├─ CartItem.php
-│ │ ├─ Category.php ├─ Order.php
-│ │ ├─ OrderItem.php ├─ OrderStatusLog.php
-│ │ ├─ Payment.php └─ Product.php
-│ ├─ Interfaces/
-│ │ ├─ IBaseRepository.php ├─ ICartRepository.php
-│ │ ├─ ICategoryRepository.php ├─ IOrderRepository.php
-│ │ ├─ IPaymentRepository.php ├─ IProductRepository.php
-│ │ └─ IReportRepository.php
-│ └─ Services/
-│ ├─ CartService.php ├─ CategoryService.php
-│ ├─ OrderService.php ├─ PaymentService.php
-│ ├─ ProductService.php
-│ └─ ReportService.php
-├─ Events/
-│ ├─ OrderCreated.php
-│ └─ PaymentCompleted.php
-├─ Http/
-│ ├─ Controllers/
-│ ├─ Middleware/
-│ └─ Policies/
-├─ Infrastructure/
-│ └─ Repositories/
-├─ Listeners/
-│ ├─ SendOrderNotification.php
-│ └─ UpdateOrderStatusOnPayment.php
-├─ Notifications/
-│ └─ OrderCompletedNotification.php
-└─ Providers/
-├─ AppServiceProvider.php
-└─ JwtServiceProvider.php
+├── Core/
+│ ├── Entities/
+│ │ ├── Cart.php
+│ │ ├── CartItem.php
+│ │ ├── Category.php
+│ │ ├── Order.php
+│ │ ├── OrderItem.php
+│ │ ├── OrderStatusLog.php
+│ │ ├── Payment.php
+│ │ └── Product.php
+│ ├── Interfaces/
+│ │ ├── IBaseRepository.php
+│ │ ├── ICartRepository.php
+│ │ ├── ICategoryRepository.php
+│ │ ├── IOrderRepository.php
+│ │ ├── IPaymentRepository.php
+│ │ ├── IProductRepository.php
+│ │ └── IReportRepository.php
+│ └── Services/
+│ ├── CartService.php
+│ ├── CategoryService.php
+│ ├── OrderService.php
+│ ├── PaymentService.php
+│ ├── ProductService.php
+│ └── ReportService.php
+├── Events/
+│ ├── OrderCreated.php
+│ └── PaymentCompleted.php
+├── Http/
+│ ├── Controllers/
+│ ├── Middleware/
+│ └── Policies/
+├── Infrastructure/
+│ └── Repositories/
+├── Listeners/
+│ ├── SendOrderNotification.php
+│ └── UpdateOrderStatusOnPayment.php
+├── Notifications/
+│ └── OrderCompletedNotification.php
+└── Providers/
+├── AppServiceProvider.php
+└── JwtServiceProvider.php
 
 database/
-├─ migrations/
-└─ seeders/
+├── migrations/
+└── seeders/
 
 routes/
-└─ api.php
+└── api.php
+
+graphql
+Kodu kopyala
 
 İlke: **Controller → Service → Repository → Model (Entities)**  
 Bağımlılıklar tersine çevrilmiştir: Controller’lar Interface’lere karşı programlar.
 
----
 
 ## ⚙️ Kurulum
 
